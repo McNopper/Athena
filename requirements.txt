@@ -1,0 +1,27 @@
+# Educational LLM Requirements
+# Python 3.10+ required (3.11+ recommended for performance)
+
+# PyTorch and core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Training utilities
+tensorboard>=2.14.0
+tqdm>=4.66.0
+numpy>=1.24.0
+
+# Optional: For tokenizer reference
+tiktoken>=0.5.0
+
+# Optional GPU backends (install ONE that matches your hardware; CPU needs none)
+# ---------------------------------------------------------------------------
+# NVIDIA (CUDA):   pip install torch --index-url https://download.pytorch.org/whl/cu124
+# AMD (ROCm):      pip install torch --index-url https://download.pytorch.org/whl/rocm6.1
+# Intel (XPU):     pip install torch --index-url https://download.pytorch.org/whl/xpu
+#                  (older PyTorch also needs: pip install intel-extension-for-pytorch)
+# Apple (MPS):     included in the default macOS PyTorch wheel (Apple Silicon only)
+# Windows DirectML (any DX12 GPU): pip install torch-directml
+# See https://pytorch.org/get-started/locally/ for the version picker.
+
+# Development and testing
+pytest>=7.4.0
