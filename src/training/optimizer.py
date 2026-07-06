@@ -5,25 +5,30 @@ This module implements optimizer setup and learning rate scheduling for LLM trai
 
 Educational Notes:
 - Optimizer: Algorithm for updating model parameters (AdamW is standard)
-- Learning Rate Schedule: Adjusts LR during training (warmup + decay)
-- AdamW: Adam with decoupled weight decay (better regularization)
-- Cosine Annealing: Smooth decay following cosine curve
-- Warmup: Gradually increase LR at start (training stability)
+- Learning Rate Schedule: Adjusts LR during training (warmup + cosine decay)
+- AdamW: Adam with decoupled weight decay (better regularisation than standard Adam)
+- Cosine Annealing: Smooth LR decay following a half-cosine curve
+- Warmup: Gradually increase LR at start to avoid instability with a fresh model
 
 Why AdamW?
-- Adam: Adaptive learning rates (different LR per parameter)
-- Weight Decay: L2 regularization (prevents overfitting)
-- AdamW: Decoupled weight decay (better than standard Adam)
+- Adam: Per-parameter adaptive learning rates (faster convergence than SGD)
+- Standard Adam: Weight decay is folded into the gradient update — this is not
+  true L2 regularisation
+- AdamW: Weight decay applied directly to parameters, decoupled from the gradient
+  update — more principled regularisation, standard for LLMs
 
 Why Learning Rate Scheduling?
-- High LR early: Fast progress
-- Low LR late: Fine-tuning and convergence
-- Warmup: Prevents instability at start
-- Decay: Ensures convergence
+- High LR early: Fast progress through the loss landscape
+- Warmup: Prevents gradient instability when model weights are random
+- Cosine decay: Smooth convergence; avoids abrupt LR drops
 
 Training Flow:
-    Warmup (steps 0-N) → Peak LR → Decay (steps N-end)
-                            → Follow cosine curve
+    Warmup (steps 0-N) → Peak LR → Cosine decay (steps N-end) → Min LR
+
+References:
+    Loshchilov & Hutter, "Decoupled Weight Decay Regularization" (2019) — https://arxiv.org/abs/1711.05101
+    Kingma & Ba, "Adam: A Method for Stochastic Optimization" (2015) — https://arxiv.org/abs/1412.6980
+    Loshchilov & Hutter, "SGDR: Stochastic Gradient Descent with Warm Restarts" (2016) — https://arxiv.org/abs/1608.03983
 """
 
 import torch

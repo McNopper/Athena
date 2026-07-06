@@ -8,7 +8,7 @@ Educational Notes:
 - This is the main model class that users interact with
 - Assembles: token embeddings → transformer stack → output projection
 - Can be used for both training and inference
-- Follows the architecture of modern LLMs (LLaMA, GPT, etc.)
+- Follows the LLaMA architecture: pre-norm, RoPE, SwiGLU, tied embeddings
 
 Complete Architecture:
     Input (token IDs)
@@ -16,11 +16,11 @@ Complete Architecture:
     Token Embeddings (learned vector for each token)
         ↓
     [Repeated N times]
-    → Transformer Block (Attention + FFN)
+    → Transformer Block (Pre-norm + Attention + Pre-norm + FFN, with residuals)
         ↓
-    RMSNorm (final normalization)
+    RMSNorm (final normalisation)
         ↓
-    Output Projection (vocab scores for next token)
+    Output Projection (vocab scores for next token, tied to input embedding)
         ↓
     Output (logits over vocabulary)
 
@@ -31,8 +31,12 @@ Model Sizes:
 - large: 100M params (640 dim, 20 heads, 16 layers)
 
 Training vs Inference:
-- Training: Compute loss over entire sequence
-- Inference: Generate token by token (autoregressive)
+- Training: Compute loss over entire sequence (teacher forcing)
+- Inference: Generate token by token (autoregressive, with KV cache)
+
+References:
+    Vaswani et al., "Attention Is All You Need" (2017) — https://arxiv.org/abs/1706.03762
+    Touvron et al., "LLaMA: Open and Efficient Foundation Language Models" (2023) — https://arxiv.org/abs/2302.13971
 """
 
 import torch

@@ -14,7 +14,7 @@ What is SwiGLU?
 - SwiGLU = Swish activation + GLU (Gated Linear Units)
 - GLU splits input into two halves, processes one, and multiplies them
 - Formula: FFN(x) = (xW_g ⊙ Swish(xW_b)) W_c
-- Swish(x) = x * sigmoid(x)
+- Swish(x) = x * sigmoid(x)  — smooth, allows small negative values
 
 Why SwiGLU is better than ReLU/GELU?
 1. Gating mechanism allows selective information flow
@@ -25,6 +25,9 @@ Why SwiGLU is better than ReLU/GELU?
 Standard FFN vs SwiGLU FFN:
 - Standard: Linear(relu(Linear(x)))  # 2 linear layers
 - SwiGLU: Linear(linear(x) ⊙ Swish(linear(x)))  # 3 linear layers, gate mechanism
+
+References:
+    Shazeer, "GLU Variants Improve Transformer" (2020) — https://arxiv.org/abs/2002.05202
 """
 
 import torch

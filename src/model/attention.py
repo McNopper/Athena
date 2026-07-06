@@ -13,7 +13,7 @@ What is Attention?
 - Query (Q): What this position is looking for
 - Key (K): What other positions are offering
 - Value (V): The actual information at each position
-- Score = Q × K^T: How well Query matches each Key
+- Score = Q × K^T / √d_k: How well Query matches each Key, scaled to stabilise gradients
 - Output = Score × V: Weighted sum of Values based on matches
 
 Multi-Head Attention:
@@ -26,6 +26,10 @@ Why Multi-Head?
 - Single attention can only focus on one type of relationship at a time
 - Multiple heads allow diverse attention patterns
 - Ensemble effect: Multiple "experts" working in parallel
+
+References:
+    Vaswani et al., "Attention Is All You Need" (2017) — https://arxiv.org/abs/1706.03762
+    Su et al., "RoFormer: Enhanced Transformer with Rotary Position Embedding" (2021) — https://arxiv.org/abs/2104.09864
 """
 
 import torch

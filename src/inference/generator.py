@@ -6,41 +6,46 @@ This module implements text generation with various sampling strategies.
 Educational Notes:
 - Generates text autoregressively (token by token)
 - Supports multiple sampling strategies
-- Uses KV cache for efficiency
-- Controls randomness with temperature, top-k, top-p
+- Uses KV cache for efficient O(N) generation (vs. O(N²) without cache)
+- Controls output diversity with temperature, top-k, and top-p
 
 Sampling Strategies:
-1. Greedy: Always pick most likely token (deterministic)
-2. Top-k: Sample from top k most likely tokens
-3. Top-p (Nucleus): Sample from tokens with cumulative probability p
-4. Temperature: Scale logits to control randomness
+1. Greedy: Always pick the most likely token (deterministic, often repetitive)
+2. Top-k: Sample from the top k most likely tokens only
+3. Top-p (Nucleus): Sample from the smallest token set whose cumulative
+   probability ≥ p — more adaptive than fixed top-k
+4. Temperature: Scale logits before softmax to control sharpness of distribution
 
 Temperature:
-- Low (< 1.0): More deterministic, focused
-- High (> 1.0): More random, diverse
-- 1.0: No scaling (standard)
+- Low (< 1.0): More deterministic, focused output
+- High (> 1.0): More random, diverse output
+- 1.0: No scaling (standard distribution)
 
 Top-k Sampling:
-- Only consider top k tokens
-- Prevents unlikely tokens
+- Only consider the top k tokens
+- Prevents sampling from very unlikely tokens
 - k=1: Same as greedy
 - k=vocab_size: No filtering
 
 Top-p (Nucleus) Sampling:
-- Consider tokens with cumulative probability p
-- More adaptive than top-k
+- Consider tokens with cumulative probability ≥ p
+- More adaptive than top-k: the set can be large for uncertain distributions
+  and small for confident ones
 - p=0.9: Common choice
 - p=1.0: No filtering
 
 Generation Flow:
     Start with prompt tokens
     Loop until max tokens or EOS:
-        1. Get model predictions
-        2. Apply sampling strategy
+        1. Forward pass (using KV cache for efficiency)
+        2. Apply sampling strategy (temperature, top-k, top-p)
         3. Sample next token
         4. Append to sequence
         5. Update KV cache
     Return generated sequence
+
+References:
+    Holtzman et al., "The Curious Case of Neural Text Degeneration" (2019) — https://arxiv.org/abs/1904.09751
 """
 
 import torch

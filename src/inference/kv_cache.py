@@ -4,10 +4,10 @@ KV Cache for Efficient Generation
 This module implements Key-Value caching for efficient autoregressive generation.
 
 Educational Notes:
-- KV Cache: Stores keys and values from previous positions
-- Avoids recomputing attention for past tokens
-- Dramatically speeds up generation
-- Essential for practical inference
+- KV Cache: Stores keys and values from previous positions so they do not
+  need to be recomputed on every token step
+- Reduces generation complexity from O(N²) to O(N)
+- Essential for practical inference — the speedup is ~50× for 100-token sequences
 
 Without KV Cache:
     Generation of N tokens:
@@ -15,15 +15,15 @@ Without KV Cache:
     - Forward pass 2: Process 2 tokens (1 + 1 new) → Output token 2
     - Forward pass 3: Process 3 tokens (2 + 1 new) → Output token 3
     ...
-    Complexity: O(N²) - Very slow!
+    Complexity: O(N²) — quadratic in sequence length
 
 With KV Cache:
     Generation of N tokens:
     - Forward pass 1: Process 1 token, cache K,V → Output token 1
-    - Forward pass 2: Process 1 token (new only), use cached K,V → Output token 2
-    - Forward pass 3: Process 1 token (new only), use cached K,V → Output token 3
+    - Forward pass 2: Process 1 token (new only), reuse cached K,V → Output token 2
+    - Forward pass 3: Process 1 token (new only), reuse cached K,V → Output token 3
     ...
-    Complexity: O(N) - Much faster!
+    Complexity: O(N) — linear in sequence length
 
 How KV Cache Works:
     Each attention layer has:
@@ -34,6 +34,10 @@ How KV Cache Works:
     - Compute new K,V for current position only
     - Concatenate with cached K,V
     - Compute attention using full K,V (cached + new)
+
+References:
+    Vaswani et al., "Attention Is All You Need" (2017) — https://arxiv.org/abs/1706.03762
+        (Section 3.2: the decoder self-attention is the origin of the K,V reuse pattern)
 """
 
 import torch

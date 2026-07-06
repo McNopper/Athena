@@ -10,16 +10,21 @@ Educational Notes:
 - During training, these vectors are learned to capture meaning
 
 Key concept: Tied Embeddings
-- Input embeddings: Token -> Vector (used at input)
-- Output embeddings: Vector -> Logits (used at output)
-- Tied embeddings: Use same matrix for both (saves parameters, improves generalization)
-- Untied embeddings: Separate matrices (more parameters, potentially better)
-- Modern LLMs often use tied embeddings for efficiency
+- Input embeddings: Token → Vector (used at the model input)
+- Output embeddings: Vector → Logits (used at the model output)
+- Tied embeddings: Use the same weight matrix for both (saves parameters,
+  improves generalisation by ensuring token representations are consistent)
+- Untied embeddings: Separate matrices (more parameters, potentially better
+  for tasks where input and output token semantics differ)
+- Modern LLMs typically tie embeddings for efficiency
 
 Why embeddings matter:
 - They form the foundation of how the model understands language
 - Similar words end up with similar embeddings (e.g., "cat" ≈ "dog")
 - The model learns these representations from data during training
+
+References:
+    Press & Wolf, "Using the Output Embedding to Improve Language Models" (2016) — https://arxiv.org/abs/1608.05859
 """
 
 import torch

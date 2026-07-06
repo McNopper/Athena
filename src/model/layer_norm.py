@@ -16,6 +16,9 @@ Why RMSNorm over LayerNorm?
 1. Simpler: No mean centering, no beta parameter
 2. Faster: Less computation, better for large models
 3. Effective: Works just as well in practice for transformers
+
+References:
+    Zhang & Sennrich, "Root Mean Square Layer Normalization" (2019) — https://arxiv.org/abs/1910.07467
 """
 
 import torch

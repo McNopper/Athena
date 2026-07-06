@@ -7,7 +7,7 @@ feed-forward networks with residual connections and normalization.
 Educational Notes:
 - Transformer block is the repeating unit in transformer models
 - Architecture: Attention → Norm → FFN → Norm (with residual connections)
-- Pre-normalization: Norm before attention/FFN (modern approach)
+- Pre-normalization: Norm before attention/FFN (modern approach, used in LLaMA)
 - Post-normalization: Norm after attention/FFN (original Transformer)
 - Residual connections: Add input back to output (helps gradient flow)
 
@@ -29,16 +29,19 @@ Block Architecture (Pre-Norm - Modern):
     Output
 
 Why Pre-Norm?
-- More stable training
-- Better gradient flow
-- Allows deeper networks
+- More stable training gradients (no vanishing/exploding at depth)
+- Allows deeper networks without careful initialisation tuning
 - Used in modern LLMs (LLaMA, GPT-3, etc.)
 
 Residual Connections:
 - Formula: output = layer(input) + input
 - Helps gradients flow through deep networks
-- Allows layers to learn modifications rather than transformations
+- Allows layers to learn modifications rather than full transformations
 - Critical for training very deep models (100+ layers)
+
+References:
+    Vaswani et al., "Attention Is All You Need" (2017) — https://arxiv.org/abs/1706.03762
+    Touvron et al., "LLaMA: Open and Efficient Foundation Language Models" (2023) — https://arxiv.org/abs/2302.13971
 """
 
 import torch

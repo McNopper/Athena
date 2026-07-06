@@ -7,7 +7,8 @@ position information in transformer models.
 Educational Notes:
 - Traditional approaches: Add positional embeddings to token embeddings
 - RoPE approach: Rotate token embeddings based on position
-- Key insight: Rotation naturally encodes relative positions
+- Key insight: Rotating Q and K by position-dependent angles encodes relative
+  distance directly into the attention dot-product — no extra parameters
 - RoPE is used in LLaMA, LLaMA 2, PaLM, and many modern LLMs
 
 Why RoPE is better than absolute position embeddings?
@@ -26,6 +27,9 @@ Mathematical intuition:
 - Rotation in complex plane: (x + yi) * (cos θ + i sin θ)
 - This preserves vector magnitude (norm) while encoding angle (position)
 - Different dimensions rotate at different frequencies (like musical notes)
+
+References:
+    Su et al., "RoFormer: Enhanced Transformer with Rotary Position Embedding" (2021) — https://arxiv.org/abs/2104.09864
 """
 
 import torch

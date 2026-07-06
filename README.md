@@ -277,7 +277,8 @@ This approach ensures everything works before investing time in long training ru
 
 ### Documentation
 
-- `docs/architecture.md` - Detailed architecture explanation
+- `docs/learning_path.md` - **Start here** — 9-paper reading guide mapped to the source files
+- `docs/architecture.md` - Detailed architecture explanation with diagrams
 - `docs/training_guide.md` - Training procedures
 - `docs/inference_guide.md` - Inference and generation
 

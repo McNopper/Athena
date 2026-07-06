@@ -237,6 +237,8 @@ output = model.generate(prompt, max_new_tokens=50, top_k=100)
 
 Keep tokens with cumulative probability p:
 
+> **Paper:** Holtzman et al., *The Curious Case of Neural Text Degeneration* (2019) — https://arxiv.org/abs/1904.09751
+
 ```mermaid
 flowchart TD
     A["Tokens with probabilities:<br/>[0.40, 0.30, 0.15, 0.08, 0.04, 0.02, 0.01, ...]"]
@@ -455,6 +457,9 @@ for i, text in enumerate(generated):
 ### 1. Use KV Cache
 
 KV cache dramatically speeds up generation:
+
+> **Paper:** Vaswani et al., *Attention Is All You Need* (2017) — https://arxiv.org/abs/1706.03762
+> (Section 3.2, decoder self-attention: the K,V reuse pattern that makes caching possible)
 
 ```python
 # Without KV cache (slow)
@@ -747,3 +752,13 @@ output = model.generate(
 - [Architecture Documentation](architecture.md) - How the model works
 - [Training Guide](training_guide.md) - How to train the model
 - [Source Code](../src/inference/) - Implementation details
+
+---
+
+## References
+
+See the full annotated list in [README.md — References](../README.md#references).
+Key papers for inference:
+
+- Vaswani et al., *Attention Is All You Need* (transformer / KV cache, 2017) — https://arxiv.org/abs/1706.03762
+- Holtzman et al., *The Curious Case of Neural Text Degeneration* (nucleus sampling, 2019) — https://arxiv.org/abs/1904.09751

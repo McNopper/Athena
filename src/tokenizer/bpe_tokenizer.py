@@ -17,9 +17,9 @@ What is BPE?
 - Results in subword tokens (e.g., "ing", "tion", "ness")
 
 Why Subword Tokenization?
-- Character-level: Too many tokens, no semantic meaning
-- Word-level: Too large vocabulary, can't handle unknown words
-- Subword: Best of both - manageable size, handles unknown words
+- Character-level: Too many tokens per sequence, no semantic meaning
+- Word-level: Vocabulary too large, unknown-word problem
+- Subword: Best of both — manageable vocabulary, handles rare/unknown words
 
 BPE Algorithm:
 1. Start with character vocabulary
@@ -34,6 +34,9 @@ Example:
     Step 3: Merge "h" + "ell" → "hell"
     Step 4: Merge "hell" + "o" → "hello"
     Result: "hello" is now a single token
+
+References:
+    Sennrich et al., "Neural Machine Translation of Rare Words with Subword Units" (2015) — https://arxiv.org/abs/1508.07909
 """
 
 from typing import List, Dict, Tuple, Set

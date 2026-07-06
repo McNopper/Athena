@@ -11,20 +11,25 @@ Educational Notes:
 
 Training Loop Steps:
     1. Load batch
-    2. Forward pass (compute logits)
-    3. Compute loss
-    4. Backward pass (compute gradients)
+    2. Forward pass (compute logits) — in FP16 via autocast
+    3. Compute cross-entropy loss
+    4. Scale loss (for FP16 stability) and backward pass
     5. Gradient accumulation (if needed)
-    6. Gradient clipping (prevent exploding)
+    6. Unscale gradients and clip (prevent exploding)
     7. Optimizer step (update weights)
     8. Logging and checkpointing
 
 Key Features:
-- Gradient Accumulation: Simulate larger batch sizes
-- Mixed Precision: FP16 for speed and memory
-- Gradient Clipping: Prevent exploding gradients
-- Validation: Monitor overfitting
-- Checkpointing: Save best model
+- Gradient Accumulation: Simulate larger batch sizes without extra memory
+- Mixed Precision (AMP): Use FP16 for forward/backward, FP32 for parameter updates.
+  A GradScaler multiplies the loss before backward() to prevent FP16 underflow,
+  then divides the gradients before the optimizer step.
+- Gradient Clipping: Caps the gradient norm to prevent exploding gradients
+- Validation: Monitor generalisation via held-out loss
+- Checkpointing: Save periodic and best-model snapshots
+
+References:
+    Micikevicius et al., "Mixed Precision Training" (2018) — https://arxiv.org/abs/1710.03740
 """
 
 import torch

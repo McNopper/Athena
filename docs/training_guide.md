@@ -107,6 +107,8 @@ flowchart TD
     RAW --> S1 --> S2 --> S3 --> S4 --> OUT
 ```
 
+> **Paper (BPE tokenization):** Sennrich et al., *Neural Machine Translation of Rare Words with Subword Units* (2015) — https://arxiv.org/abs/1508.07909
+
 **Output Files:**
 ```
 data/processed/
@@ -285,6 +287,12 @@ Misc:
   --seed N               Random seed
   --device {cuda,cpu}    Device to use
 ```
+
+> **Papers (optimizer and schedule):**
+> - Loshchilov & Hutter, *Decoupled Weight Decay Regularization (AdamW)* (2019) — https://arxiv.org/abs/1711.05101
+> - Loshchilov & Hutter, *SGDR: Stochastic Gradient Descent with Warm Restarts* (2016) — https://arxiv.org/abs/1608.03983
+>
+> **Paper (mixed-precision / FP16):** Micikevicius et al., *Mixed Precision Training* (2018) — https://arxiv.org/abs/1710.03740
 
 ---
 
@@ -541,3 +549,15 @@ After training:
 **For more details:**
 - [Architecture Documentation](architecture.md) - Detailed architecture explanation
 - [Inference Guide](inference_guide.md) - How to use trained model
+
+---
+
+## References
+
+See the full annotated list in [README.md — References](../README.md#references).
+Key papers for training:
+
+- Sennrich et al., *Neural Machine Translation of Rare Words with Subword Units* (BPE, 2015) — https://arxiv.org/abs/1508.07909
+- Loshchilov & Hutter, *Decoupled Weight Decay Regularization* (AdamW, 2019) — https://arxiv.org/abs/1711.05101
+- Loshchilov & Hutter, *SGDR: Stochastic Gradient Descent with Warm Restarts* (cosine LR, 2016) — https://arxiv.org/abs/1608.03983
+- Micikevicius et al., *Mixed Precision Training* (FP16, 2018) — https://arxiv.org/abs/1710.03740

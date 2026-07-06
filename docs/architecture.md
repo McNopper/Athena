@@ -82,6 +82,8 @@ flowchart TD
 
 **Purpose:** Convert discrete token IDs to continuous vectors.
 
+> **Paper:** Press & Wolf, *Using the Output Embedding to Improve Language Models* (2016) — https://arxiv.org/abs/1608.05859
+
 ```mermaid
 flowchart LR
     A["Token ID<br/>(integer)"] --> B["Lookup Table"] --> C["Embedding Vector<br/>(continuous)"]
@@ -106,6 +108,8 @@ flowchart TD
 ### 2. Rotary Position Embeddings (RoPE)
 
 **Purpose:** Encode position information in token embeddings through rotation.
+
+> **Paper:** Su et al., *RoFormer: Enhanced Transformer with Rotary Position Embedding* (2021) — https://arxiv.org/abs/2104.09864
 
 **Why RoPE?**
 - Traditional: Add position embeddings to token embeddings
@@ -136,6 +140,8 @@ flowchart TD
 ### 3. Multi-Head Attention
 
 **Purpose:** Allow model to focus on different parts of the input sequence simultaneously.
+
+> **Paper:** Vaswani et al., *Attention Is All You Need* (2017) — https://arxiv.org/abs/1706.03762
 
 **Key Concepts:**
 - **Query (Q):** What this position is looking for
@@ -181,6 +187,8 @@ flowchart TD
 
 **Purpose:** Add non-linearity and computational capacity after attention.
 
+> **Paper:** Shazeer, *GLU Variants Improve Transformer* (2020) — https://arxiv.org/abs/2002.05202
+
 **SwiGLU Activation:**
 ```
 SwiGLU(x) = Swish(x) ⊙ (xW_g)
@@ -208,6 +216,10 @@ flowchart TD
 ### 5. Transformer Block
 
 **Complete Block with Residual Connections:**
+
+> **Papers:**
+> - Vaswani et al., *Attention Is All You Need* (2017) — https://arxiv.org/abs/1706.03762 (original block, post-norm)
+> - Touvron et al., *LLaMA* (2023) — https://arxiv.org/abs/2302.13971 (pre-norm with RMSNorm; Zhang & Sennrich, *RMSNorm* (2019) — https://arxiv.org/abs/1910.07467)
 
 ```mermaid
 flowchart TD
