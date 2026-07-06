@@ -330,7 +330,8 @@ xychart-beta
     line [0, 1.0, 0.85, 0.5, 0.15, 0.0]
 ```
 
-- **Warmup:** Linear increase from 0 to peak LR
+- **Warmup:** Linear increase to peak LR (the first step already uses a
+  non-zero LR of `peak / warmup_steps`, so no update is wasted at LR 0)
 - **Decay:** Cosine decrease from peak to min LR
 
 ---

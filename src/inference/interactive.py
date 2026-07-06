@@ -100,10 +100,12 @@ class InteractiveCLI:
                     continue
 
                 # Encode prompt (if tokenizer available)
+                # Educational note: prepend BOS only. EOS terminates a sequence
+                # in the training data, so adding it after the prompt would tell
+                # the model the text has already ended.
                 if self.tokenizer:
-                    prompt_tokens = torch.tensor(
-                        [self.tokenizer.encode(user_input, add_special_tokens=True)]
-                    )
+                    prompt_ids = [self.tokenizer.vocab.bos_token_id] + self.tokenizer.encode(user_input)
+                    prompt_tokens = torch.tensor([prompt_ids])
                 else:
                     # Placeholder: Assume user provides token IDs
                     print("Note: No tokenizer provided. Please provide token IDs.")

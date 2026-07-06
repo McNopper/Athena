@@ -22,11 +22,15 @@ Find your trained model checkpoint:
 ls -lh data/checkpoints/
 
 # Example output:
-# best.pt         (model with lowest validation loss)
+# best.pt         (best model so far - lowest tracked loss)
 # checkpoint_step_5000.pt
 # checkpoint_step_10000.pt
 # ...
 ```
+
+Both kinds of files are always written: every `--checkpoint-every` interval
+produces a `checkpoint_step_N.pt` (used by `load_latest()` to resume), and
+`best.pt` is additionally updated whenever the tracked loss improves.
 
 ### Step 2: Load Model
 
@@ -47,19 +51,20 @@ device = get_device()
 model = model.to(device)
 
 # Load checkpoint weights
-checkpoint = torch.load("data/checkpoints/best.pt", map_location="cpu")
+# weights_only=False because the checkpoint also stores the ModelConfig object
+checkpoint = torch.load("data/checkpoints/best.pt", map_location="cpu", weights_only=False)
 model.load_state_dict(checkpoint["model_state_dict"])
 
 print(f"Model loaded successfully")
 print(f"Training step: {checkpoint['step']}")
-print(f"Validation loss: {checkpoint['loss']:.4f}")
+print(f"Loss: {checkpoint['loss']:.4f}")
 ```
 
 **Output:**
 ```
 Model loaded successfully
 Training step: 50000
-Validation loss: 2.3456
+Loss: 2.3456
 ```
 
 ### Step 3: Set to Evaluation Mode
@@ -366,8 +371,8 @@ def interactive_generation(model, tokenizer, device):
         if prompt.lower() == 'quit':
             break
         
-        # Encode (would need tokenizer)
-        prompt_tokens = tokenizer.encode(prompt, add_special_tokens=True)
+        # Encode (BOS only - EOS would signal "sequence over" to the model)
+        prompt_tokens = [tokenizer.vocab.bos_token_id] + tokenizer.encode(prompt)
         prompt_tokens = torch.tensor([prompt_tokens]).to(device)
         
         # Generate
@@ -396,9 +401,9 @@ def batch_generate(model, prompts, batch_size=4, max_tokens=50):
     """Generate from multiple prompts in batch."""
     model.eval()
     
-    # Tokenize all prompts
+    # Tokenize all prompts (BOS only - no EOS after a prompt)
     prompt_tokens_list = [
-        tokenizer.encode(p, add_special_tokens=True)
+        [tokenizer.vocab.bos_token_id] + tokenizer.encode(p)
         for p in prompts
     ]
     
@@ -544,10 +549,10 @@ model.eval()
 # Load the tokenizer produced by scripts/prepare_data.py
 tokenizer = BPETokenizer.load("data/processed/tokenizer.json")
 
-# Encode a real prompt
+# Encode a real prompt (BOS only - EOS would signal "sequence over")
 prompt = "Once upon a time"
 prompt_tokens = torch.tensor(
-    [tokenizer.encode(prompt, add_special_tokens=True)], device=device
+    [[tokenizer.vocab.bos_token_id] + tokenizer.encode(prompt)], device=device
 )
 
 # Generate (KV cache is used internally by model.generate)
@@ -582,9 +587,9 @@ prompts = [
 ]
 
 for prompt in prompts:
-    # Tokenize with the trained BPE tokenizer
+    # Tokenize with the trained BPE tokenizer (BOS only, no EOS)
     prompt_tokens = torch.tensor(
-        [tokenizer.encode(prompt, add_special_tokens=True)], device=device
+        [[tokenizer.vocab.bos_token_id] + tokenizer.encode(prompt)], device=device
     )
 
     # Generate (returns token-id lists)

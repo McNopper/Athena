@@ -155,23 +155,29 @@ class CheckpointManager:
             current_metric = metrics.get(self.metric_name, loss) if metrics else loss
             is_best = is_best or (current_metric < self.best_metric)
         else:
+            current_metric = None
             is_best = False
 
-        # Generate filename
-        if is_best:
-            filename = "best.pt"
-            self.best_metric = current_metric
-            self.best_checkpoint_path = self.save_dir / filename
-        elif filename is None:
+        # Always write the regular checkpoint. An explicitly passed filename
+        # wins; the default is a step-numbered file. This guarantees periodic
+        # step checkpoints exist even when the same save also improves "best"
+        # (so load_latest() always has something to resume from).
+        if filename is None:
             filename = f"checkpoint_step_{step}.pt"
-
-        # Save checkpoint
         checkpoint_path = self.save_dir / filename
         torch.save(checkpoint_data, checkpoint_path)
 
-        # Cleanup old checkpoints (except best)
-        if not is_best:
-            self._cleanup_checkpoints()
+        # Additionally save/update best.pt when this is the best so far.
+        # Educational note: only move best_metric forward when the metric
+        # actually improved - a caller-forced is_best must not regress it.
+        if is_best:
+            if current_metric is not None and current_metric < self.best_metric:
+                self.best_metric = current_metric
+            self.best_checkpoint_path = self.save_dir / "best.pt"
+            torch.save(checkpoint_data, self.best_checkpoint_path)
+
+        # Cleanup old step checkpoints (best.pt is never touched).
+        self._cleanup_checkpoints()
 
         return str(checkpoint_path)
 

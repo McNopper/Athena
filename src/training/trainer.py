@@ -124,6 +124,14 @@ class LLMTrainer:
         self.current_epoch = 0
         self.max_steps: Optional[int] = None
 
+        # Logging-interval accumulators. Reset after every log line so the
+        # reported loss / throughput reflect the *recent* window rather than a
+        # since-start average that lags the current loss.
+        self._interval_loss = 0.0
+        self._interval_batches = 0
+        self._interval_tokens = 0
+        self._interval_start = time.time()
+
         # Device and mixed precision.
         # Educational note: automatic mixed precision (AMP) only pays off on
         # CUDA GPUs with Tensor Cores, so we enable it there and fall back to
@@ -240,14 +248,18 @@ class LLMTrainer:
             self.scaler.scale(loss).backward()
             pending_grads = True
 
-            accumulated_loss += loss.item() * window_size
+            batch_loss = loss.item() * window_size  # undo the window scaling
+            accumulated_loss += batch_loss
             accumulated_tokens += num_tokens
             num_batches += 1
+            self._interval_loss += batch_loss
+            self._interval_batches += 1
+            self._interval_tokens += num_tokens
 
             # Step once the window is complete (also handles a short final window)
             window_complete = (batch_idx + 1 - window_start) >= window_size
             if window_complete:
-                self._apply_optimizer_step(accumulated_loss, accumulated_tokens, num_batches)
+                self._apply_optimizer_step(accumulated_loss, num_batches)
                 pending_grads = False
 
                 # Check if we should stop mid-epoch
@@ -257,14 +269,13 @@ class LLMTrainer:
         # Flush any leftover accumulated gradients (e.g. when the dataloader
         # length is unknown and the last window never reached window_size).
         if pending_grads:
-            self._apply_optimizer_step(accumulated_loss, accumulated_tokens, num_batches)
+            self._apply_optimizer_step(accumulated_loss, num_batches)
 
         return accumulated_loss / num_batches if num_batches > 0 else 0.0
 
     def _apply_optimizer_step(
         self,
         accumulated_loss: float,
-        accumulated_tokens: int,
         num_batches: int,
     ) -> bool:
         """
@@ -273,6 +284,10 @@ class LLMTrainer:
         Handles gradient clipping, the AMP scaler step (which may skip on
         overflow), the LR schedule step, the global-step counter, and periodic
         logging / validation / checkpointing.
+
+        Args:
+            accumulated_loss: Epoch-cumulative loss (used for checkpoint metadata)
+            num_batches: Epoch-cumulative batch count
 
         Returns:
             True if the optimizer actually stepped, False if AMP skipped it.
@@ -288,6 +303,9 @@ class LLMTrainer:
                 )
             )
         else:
+            # Unscale first so the reported norm is in real (unscaled) units
+            # under AMP (unscale_ is a no-op when AMP is disabled).
+            self.scaler.unscale_(self.opt_sched.optimizer)
             grad_norm = compute_gradient_norm(self.model)
 
         # Optimizer step (through the scaler) then LR schedule step.
@@ -312,14 +330,18 @@ class LLMTrainer:
         # Update step
         self.global_step += 1
 
-        # Log metrics
+        # Log metrics (recent-interval averages, reset after each log line)
         if self.global_step % self.log_every == 0:
-            avg_loss = accumulated_loss / num_batches
+            avg_loss = (
+                self._interval_loss / self._interval_batches
+                if self._interval_batches > 0
+                else 0.0
+            )
             lr = self.opt_sched.learning_rate
 
-            # Throughput
-            elapsed = time.time() - self._get_start_time()
-            tokens_per_sec = accumulated_tokens / elapsed if elapsed > 0 else 0
+            # Throughput over the current logging interval
+            elapsed = time.time() - self._interval_start
+            tokens_per_sec = self._interval_tokens / elapsed if elapsed > 0 else 0
 
             if self.logger:
                 self.logger.log(
@@ -330,6 +352,12 @@ class LLMTrainer:
                     tokens_per_sec=tokens_per_sec,
                     epoch=self.current_epoch,
                 )
+
+            # Reset the interval accumulators
+            self._interval_loss = 0.0
+            self._interval_batches = 0
+            self._interval_tokens = 0
+            self._interval_start = time.time()
 
         # Validation
         if self.val_dataloader and self.global_step % self.validation_every == 0:
@@ -437,12 +465,6 @@ class LLMTrainer:
             "loss": avg_loss,
             "perplexity": perplexity,
         }
-
-    def _get_start_time(self) -> float:
-        """Get training start time."""
-        if not hasattr(self, '_start_time'):
-            self._start_time = time.time()
-        return self._start_time
 
 
 def test_trainer():

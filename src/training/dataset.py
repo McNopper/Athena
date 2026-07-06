@@ -68,7 +68,9 @@ class LLMTrainerDataset(Dataset):
         max_sequence_length: int = 512,
         pad_token_id: int = 0,
     ):
-        self.sequences = sequences
+        # A training example needs at least 2 tokens (one input, one target);
+        # shorter sequences would produce empty tensors, so filter them out.
+        self.sequences = [seq for seq in sequences if len(seq) >= 2]
         self.max_sequence_length = max_sequence_length
         self.pad_token_id = pad_token_id
 

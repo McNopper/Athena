@@ -151,7 +151,10 @@ def load_model_from_checkpoint(checkpoint_path: str, device: torch.device, confi
 
 def generate_text(model: LLM, tokenizer: BPETokenizer, prompt: str, args, device: torch.device) -> str:
     """Encode a prompt, generate, and decode back to text."""
-    prompt_ids = tokenizer.encode(prompt, add_special_tokens=True)
+    # Prepend BOS only. EOS marks end-of-sequence in the training data, so
+    # appending it to the prompt would tell the model the document is already
+    # over and make it ignore the prompt instead of continuing it.
+    prompt_ids = [tokenizer.vocab.bos_token_id] + tokenizer.encode(prompt)
     prompt_tensor = torch.tensor([prompt_ids], dtype=torch.long, device=device)
 
     generated = model.generate(

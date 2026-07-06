@@ -144,8 +144,10 @@ def get_cosine_schedule_with_warmup(
         """
         if current_step < warmup_steps:
             # Educational note: Linear warmup
-            # Gradually increase from 0 to 1
-            return float(current_step) / float(max(1, warmup_steps))
+            # +1 so the very first optimizer step already uses a non-zero LR
+            # (LambdaLR evaluates the lambda at step 0 on construction, which
+            # would otherwise make the first update a no-op with LR = 0).
+            return float(current_step + 1) / float(max(1, warmup_steps))
         else:
             # Educational note: Cosine decay
             # Progress from 0 to 1 over training
@@ -193,7 +195,8 @@ def get_linear_schedule_with_warmup(
 
     def lr_lambda(current_step: int) -> float:
         if current_step < warmup_steps:
-            return float(current_step) / float(max(1, warmup_steps))
+            # +1 so the first optimizer step uses a non-zero LR (see cosine).
+            return float(current_step + 1) / float(max(1, warmup_steps))
         else:
             progress = float(current_step - warmup_steps) / float(max(1, max_steps - warmup_steps))
             return max(min_lr_ratio, 1.0 - progress)
